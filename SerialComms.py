@@ -1,4 +1,4 @@
-import sys, re, serial
+import sys, re, serial, time
 from util.ColorLogBase import ColorLogBase
 from util.CursesBuffers import BaseBuffer
 
