@@ -41,6 +41,8 @@ class SerialComm(ColorLogBase):
 
     def readWrite(self, msg: bytes, ending="\r", encoding='utf-8', chars=None):
         try:
+            if isinstance(msg, str):
+                msg = bytes(f"{msg}", encoding=encoding)
             finString = "ERR"
             with serial.Serial(self.port, self.baud, timeout=self.timeout) as ser:
                 outmsg = msg + bytes(f"{ending}", encoding=encoding)
