@@ -19,7 +19,7 @@ class ColorLogBase:
     
     def updateStreamHandler(self, newHandler: logging.Handler = None):
         if newHandler:
-            self.log.handlers = [h for h in self.log.handlers if not isinstance(h, logging.StreamHandler)]
+            self.log.handlers = [h for h in self.log.handlers if isinstance(h, logging.FileHandler)]
             self.log.addHandler(newHandler)
 
     def updateLevel(self, newLevel: int = logging.DEBUG):
