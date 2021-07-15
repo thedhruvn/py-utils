@@ -3,7 +3,7 @@ import ast
 import inspect
 from typing import Callable
 import warnings
-
+import textwrap
 
 class StoppableLoopingThread(threading.Thread):
     """
@@ -56,8 +56,10 @@ class StoppableLoopingThread(threading.Thread):
 
     def uses_while(self, fn: Callable) -> bool:
         try:
-            nodes = ast.walk(ast.parse(inspect.getsource(fn)))
+            nodes = ast.walk(ast.parse(textwrap.dedent(inspect.getsource(fn))))
             return any(isinstance(node, ast.While) for node in nodes)
+        #except IndentationError as e:
+        #    return False
         except Exception as e:
             warnings.warn(f"Alert: {type(e)} occurred when checking the target: {e}. Continuing onwards...")
             return False
