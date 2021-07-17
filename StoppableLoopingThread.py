@@ -14,7 +14,7 @@ class StoppableLoopingThread(threading.Thread):
 
         Note:  will return an error if the target function has a while loop in the source code
     """
-    def __init__(self,delay=0.005, *args, **kwargs):
+    def __init__(self,delay=0.005,max_loops=None, *args, **kwargs):
         #self.args1 = args
         #self.kwargs1 = kwargs
         #self.delay = delay
@@ -23,6 +23,7 @@ class StoppableLoopingThread(threading.Thread):
         # super().__init__(self)
         self._stop_event = threading.Event()
         self.delay = delay
+        self.max_loops = max_loops
 
     def stop(self):
         self._stop_event.set()
@@ -45,8 +46,15 @@ class StoppableLoopingThread(threading.Thread):
             if self._target:
                 if self.uses_while(self._target):
                     raise RuntimeError("Target function has a while loop")
-                while not self._stop_event.wait(timeout=self.delay):
-                    self._target(*self._args, **self._kwargs)
+                if self.max_loops is not None:
+                    for i in range(0,self.max_loops):
+                        if not self._stop_event.wait(timeout=self.delay):
+                            self._target(*self._args, **self._kwargs)
+                        else:
+                            break
+                else:
+                    while not self._stop_event.wait(timeout=self.delay):
+                        self._target(*self._args, **self._kwargs)
             else:
                 warnings.warn("Target not specified...")
         finally:
