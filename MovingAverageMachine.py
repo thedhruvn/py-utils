@@ -3,7 +3,7 @@ from util.ColorLogBase import ColorLogBase
 from statistics import mean
 
 
-Class MovingAverageNumber(ColorLogBase):
+class MovingAverageNumber(ColorLogBase):
 
 	def __init__(self, window=24, seed=0):
 		super().__init__()
@@ -30,7 +30,7 @@ Class MovingAverageNumber(ColorLogBase):
 	def get_average(self, rounding=None):
 		return self.get_avg(rounding)
 
-	def get_bool_average(self, threshold=1, rounding=None):
+	def get_bool_average(self, threshold=0.5, rounding=None):
 		"""
 		If Moving Average >= threshold, return True
 		"""
