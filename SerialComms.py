@@ -88,7 +88,7 @@ class SerialComm(ColorLogBase):
                     readString = ser.readline()
                 if len(readString) < 1:
                     readString = ser.read(64)
-                finString = readString.decode(encoding=encoding)
+                finString = readString.decode(encoding=encoding, errors='ignore')
                 # finString = re.sub(r'\W+','',finString)
                 # finString = re.sub(r'[^ \w\.]','',finString)
                 self.log.debug(f"read: {finString}")
