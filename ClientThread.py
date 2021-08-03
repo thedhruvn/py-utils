@@ -34,6 +34,15 @@ class ClientThread(Thread):
         self.client.close()
 
     def parse_input(self, text):
+        """
+         All command components are separated by a ":"
+         All commands are separated by a "/"
+
+         I.e.: To move 1000 steps, "D:1000/"
+                                    "{motor addr}:{cmd}:{opt args}/"
+
+
+        """
         if len(text) != 0:
             parts = text.split(':')
             if len(parts) > 2:
