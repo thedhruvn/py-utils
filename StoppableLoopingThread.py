@@ -25,6 +25,7 @@ class StoppableLoopingThread(threading.Thread):
         self.delay = delay
         self.max_loops = max_loops
         self.payload = payload #STORE metadata on execution if desired
+        self.stop_event_kwname = 'stop_event'
 
     def stop(self):
         self._stop_event.set()
@@ -46,7 +47,10 @@ class StoppableLoopingThread(threading.Thread):
         try:
             if self._target:
                 if self.uses_while(self._target):
-                    raise RuntimeError("Target function has a while loop")
+                    if not self.stop_event_kwname in self.get_all_args(self._target):
+                        raise RuntimeError("Target function has an unstoppable while loop")
+                    # pass_stop_event_flag = True
+                    self._kwargs.update({self.stop_event_kwname:self._stop_event})
                 if self.max_loops is not None:
                     for i in range(0,self.max_loops):
                         if not self._stop_event.wait(timeout=self.delay):
@@ -62,6 +66,12 @@ class StoppableLoopingThread(threading.Thread):
             # Avoid a refcycle if the thread is running a function with
             # an argument that has a member that points to the thread.
             del self._target, self._args, self._kwargs
+
+    def get_all_args(self, fn: Callable):
+        args, varargs, varkw, defaults = inspect.getargspec(fn)
+        if defaults:
+            args = args[:-len(defaults)]
+        return args
 
     def uses_while(self, fn: Callable) -> bool:
         try:
