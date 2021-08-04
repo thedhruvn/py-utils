@@ -1,5 +1,45 @@
 from threading import *
 import serial
+import queue
+from StoppableLoopingThread import StoppableLoopingThread
+from ColorLogBase import ColorLogBase
+
+class TCPReceiverThread(StoppableLoopingThread, ColorLogBase):
+    def __init__(self,host, port, inQueue, outQueue: queue.Queue(), *args, **kwargs):
+        StoppableLoopingThread.__init__(self, *args, **kwargs)
+        ColorLogBase.__init__(self)
+        self.host = host
+        self.port = port
+        self.queue = inQueue
+        self.out_queue = outQueue
+        self.BUFFER_SIZE = 4096 
+
+    def run(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((self.host, self.port))
+            self.log.info("connected to server at" + str(s.getsockname()[0]) + "on port " + str(s.getsockname()[1]))
+
+            while not self.stopped():
+                # get next chunk of data from the server
+                d = s.recv(BUFFER_SIZE).decode("utf-8").split('/')
+                for data in d:
+                    if len(data) > 0 and not data[0].isnumeric():
+                        # for debugging purposes, we'll display what we received in the window
+                        self.log.debug(f"Received: {data}")
+                        self.queue.put(data)
+
+                        # # then send back the response from processing the input
+                        # response = str(self.parse_input(data) + '/').encode('utf-8')
+                        # self.log.debug(response)
+                        # s.sendall(response)
+                self.queue.join()
+                for i in range(0, len(d)):
+                    item = self.out_queue.get(block=True)
+                    self.log.debug(f"Output {item}")
+                    s.sendall(str(item).encode('utf-8'))
+                    self.out_queue.task_done()
+            
+
 
 class ClientThread(Thread):
     def __init__(self, bp, rc, vat, laser, host, port):
@@ -15,23 +55,24 @@ class ClientThread(Thread):
     def run(self):
         BUFFER_SIZE = 4096
         #global self.client
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.connect((self.host, self.port))
-        print("connected to server at" + str(self.client.getsockname()[0]) + "on port " + str(self.client.getsockname()[1]))
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            #self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client.connect((self.host, self.port))
+            print("connected to server at" + str(self.client.getsockname()[0]) + "on port " + str(self.client.getsockname()[1]))
 
-        while True:
-            # get next chunk of data from the server
-            d = self.client.recv(BUFFER_SIZE).decode("utf-8").split('/')
-            for data in d:
-                if len(data) > 0 and not data[0].isnumeric():
-                    # for debugging purposes, we'll display what we received in the window
-                    print(f"Received: {data}")
+            while True:
+                # get next chunk of data from the server
+                d = self.client.recv(BUFFER_SIZE).decode("utf-8").split('/')
+                for data in d:
+                    if len(data) > 0 and not data[0].isnumeric():
+                        # for debugging purposes, we'll display what we received in the window
+                        print(f"Received: {data}")
 
-                    # then send back the response from processing the input
-                    response = str(self.parse_input(data) + '/').encode('utf-8')
-                    print(response)
-                    self.client.sendall(response)
-        self.client.close()
+                        # then send back the response from processing the input
+                        response = str(self.parse_input(data) + '/').encode('utf-8')
+                        print(response)
+                        self.client.sendall(response)
+            self.client.close()
 
     def parse_input(self, text):
         """
