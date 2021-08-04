@@ -1,8 +1,9 @@
 from threading import *
 import serial
-import queue
-from StoppableLoopingThread import StoppableLoopingThread
-from ColorLogBase import ColorLogBase
+import queue, socket
+from util.StoppableLoopingThread import StoppableLoopingThread
+from util.ColorLogBase import ColorLogBase
+
 
 class TCPReceiverThread(StoppableLoopingThread, ColorLogBase):
     def __init__(self,host, port, inQueue, outQueue: queue.Queue(), *args, **kwargs):
@@ -23,7 +24,8 @@ class TCPReceiverThread(StoppableLoopingThread, ColorLogBase):
                 # get next chunk of data from the server
                 d = s.recv(BUFFER_SIZE).decode("utf-8").split('/')
                 for data in d:
-                    if len(data) > 0 and not data[0].isnumeric():
+                    if len(data) > 0:
+                    # if len(data) > 0 and not data[0].isnumeric():
                         # for debugging purposes, we'll display what we received in the window
                         self.log.debug(f"Received: {data}")
                         self.queue.put(data)
@@ -35,6 +37,7 @@ class TCPReceiverThread(StoppableLoopingThread, ColorLogBase):
                 self.queue.join()
                 for i in range(0, len(d)):
                     item = self.out_queue.get(block=True)
+                    item = str(item) + "/"
                     self.log.debug(f"Output {item}")
                     s.sendall(str(item).encode('utf-8'))
                     self.out_queue.task_done()
