@@ -2,6 +2,7 @@ import sys, re, serial, time
 from util.ColorLogBase import ColorLogBase
 from util.CursesBuffers import BaseBuffer
 
+
 class SerialBuffer(ColorLogBase, BaseBuffer):
     def __init__(self, maxBuf=20, port='/dev/ttyUSB0'):
         BaseBuffer.__init__(self, maxBuf=maxBuf)
