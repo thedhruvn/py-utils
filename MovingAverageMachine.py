@@ -1,5 +1,5 @@
 import time, logging
-from util.ColorLogBase import ColorLogBase
+from ColorLogBase import ColorLogBase
 from statistics import mean
 
 
@@ -13,8 +13,6 @@ class MovingAverageNumber(ColorLogBase):
         self.threshold = 0.5
         self.__initialize_buffer()
 
-
-        
     def __initialize_buffer(self):
         for i in range(0, self.window):
             self.buffer.append(self.seed)

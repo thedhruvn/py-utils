@@ -5,6 +5,7 @@ from typing import Callable
 import warnings
 import textwrap
 
+
 class StoppableLoopingThread(threading.Thread):
     """
         Extension of the Thread Object that performs a task repetitively
