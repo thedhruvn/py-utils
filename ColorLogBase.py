@@ -12,7 +12,6 @@ class ColorLogBase:
         self.log.addHandler(outHandler if outHandler else globalLogHandler)
         self.log.addHandler(outFileHandler if outFileHandler else globalOutFileHandler)
         self.log.setLevel(outLevel)
-    
 
     def addStreamHandler(self, newHandler: logging.Handler = None):
         self.log.addHandler(newHandler)    
