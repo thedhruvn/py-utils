@@ -1,6 +1,7 @@
 import sys, re, serial, time
-from util.ColorLogBase import ColorLogBase
-from util.CursesBuffers import BaseBuffer
+import glob
+from ColorLogBase import ColorLogBase
+from CursesBuffers import BaseBuffer
 
 
 class SerialBuffer(ColorLogBase, BaseBuffer):
@@ -29,9 +30,6 @@ class StdBuffer(SerialBuffer):
 
     def get_text(self, beg=0, end=1):
         return '\n'.join(self.msgBuffer[beg:end])
-
-import sys
-import glob
 
 
 def sys_serial_ports():

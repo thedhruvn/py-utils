@@ -1,8 +1,8 @@
 from threading import *
-import serial
+import re
 import queue, socket, time
-from util.StoppableLoopingThread import StoppableLoopingThread
-from util.ColorLogBase import ColorLogBase
+from StoppableLoopingThread import StoppableLoopingThread
+from ColorLogBase import ColorLogBase
 
 
 class TCPServer(ColorLogBase):
@@ -15,7 +15,6 @@ class TCPServer(ColorLogBase):
         self.ready_to_send = False
         self.BUFFER_SIZE = 4096
         self.serverThread = StoppableLoopingThread(target=self.__run_server)
-
 
     def __run_server(self, stop_event):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -169,7 +168,7 @@ class ClientThread(Thread):
                         response = str(self.parse_input(data) + '/').encode('utf-8')
                         print(response)
                         self.client.sendall(response)
-            self.client.close()
+
 
     def parse_input(self, text):
         """
@@ -199,28 +198,10 @@ class ClientThread(Thread):
                 elif int(component) == 3:
                     return self.vat.process_command(cmd)
                 elif int(component) == 4:
-                    return sensor.read_curr_value()
+                    return self.sensor.read_curr_value()
                 else:
                     return
             else:
                 return "Improper command received for component " + component
 
 
-if __name__ == "__main__":
-    host = '127.0.0.1'
-    port = 8080
-    if len(sys.argv) > 0:
-        if len(sys.argv) == 2:
-            host = sys.argv[0]
-            port = int(sys.argv[1])
-        else:
-            port = int(sys.argv[0])
-
-    ser = serial.Serial('/dev/ttyUSB0')
-    rc = RecoaterMotor(port=ser)
-    bp = BuildPlateMotor(port=ser)
-    vat = VatMotor(port=ser)
-    sensor = LaserSensor()
-
-    controller = ClientThread(bp=bp, rc=rc, vat=vat, laser=sensor, host=host, port=port)
-    controller.start()

@@ -1,6 +1,6 @@
 import logging, colorlog
 import sys, curses
-from util.ColorLogBase import ColorLogBase
+from ColorLogBase import ColorLogBase
 
 class BaseBuffer:
     def __init__(self, maxBuf=20):
